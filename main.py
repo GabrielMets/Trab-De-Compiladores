@@ -313,7 +313,7 @@ producoes = {
     27: ('<senao_op>', ['SENAO', '{', '<instrucoes>', '}']),
     28: ('<senao_op>', ['SENAO_VAZIO']),  # Ɛ
     29: ('<loop_durante>', ['DURANTE', '(', '<expr>', ')', '{', '<instrucoes>', 'Variavel', '<inc_dec>', '}']),
-    30: ('<loop_para>', ['PARA', '(', '<atrib>', '.', '<condicao>', '.', 'Variavel', '<inc_dec>', ')', '{', '<instrucoes>', '}']),
+    30: ('<loop_para>', ['PARA', '(', '<atrib>', '.', '<expr>', '.', 'Variavel', '<inc_dec>', ')', '{', '<instrucoes>', '}']),
     31: ('<condicao>', ['<expr>', '<op_relacional>', '<expr>']),
     32: ('<inc_dec>', ['INC']),
     33: ('<inc_dec>', ['DEC']),
@@ -328,6 +328,7 @@ producoes = {
     42: ('<op>', ['op_relacional']),
     43: ('<op>', ['op_arit']),
     44: ('<op>', ['op_logico']),
+    45: ('<decl>', ['Variavel', '<inc_dec>']),
 }
 
 
@@ -343,6 +344,14 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
         print("Pilha:", pilha)
         print()
 
+        if estado_atual == 71 and token_atual == '}': #look ahead
+           print('caso expecial')
+           pilha.pop()
+           pilha.extend(['Variavel', '<inc_dec>', 95])
+           print(pilha)
+           estado_atual = pilha[-1]
+
+        #Variavel <inc_dec>
         if token_atual in tabela_SLR.columns and not pd.isna(tabela_SLR.loc[estado_atual, token_atual]):
             acao = interpretar_entrada_tabela(tabela_SLR.loc[estado_atual, token_atual])
         else:
@@ -372,6 +381,10 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
           cursor += 1  
 
         elif acao[0] == 'reduz':
+            if acao[1] == 30:
+              print('eita')
+              pilha = pilha[:-2]
+              print(pilha)
 
             num_producao = acao[1]
             nao_terminal, producao = producoes[num_producao]
