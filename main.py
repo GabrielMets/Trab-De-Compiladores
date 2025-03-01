@@ -339,16 +339,16 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
     while cursor < len(tokens1):
         estado_atual = pilha[-1]  
         token_atual = tokens1[cursor][0]  
-        print("Estado atual:", estado_atual)
-        print("Token atual:", token_atual)
-        print("Pilha:", pilha)
-        print()
+        #print("Estado atual:", estado_atual)
+        #print("Token atual:", token_atual)
+        #print("Pilha:", pilha)
+        #print()
 
         if estado_atual == 71 and token_atual == '}': #look ahead
-           print('caso expecial')
+           #print('caso expecial')
            pilha.pop()
            pilha.extend(['Variavel', '<inc_dec>', 95])
-           print(pilha)
+           #print(pilha)
            estado_atual = pilha[-1]
 
         #Variavel <inc_dec>
@@ -358,11 +358,11 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
 
           
           print(f"Erro: Token '{token_atual}' não encontrado na tabela ou entrada inválida para o estado {estado_atual}.")
-          print(tabela_SLR.loc[estado_atual, token_atual])
+          #print(tabela_SLR.loc[estado_atual, token_atual])
           return False
 
-        print("Ação:", acao)
-        print()
+        #print("Ação:", acao)
+        #print()
 
         if acao is None:
             print(f"Erro sintático: token inesperado '{token_atual}' na linha {tokens1[cursor][2]}")
@@ -379,25 +379,26 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
           pilha.append(token_atual)  
           pilha.append(novo_estado)  
           cursor += 1  
+          #print(pilha)
 
         elif acao[0] == 'reduz':
             if acao[1] == 30:
-              print('eita')
+              #print('eita')
               pilha = pilha[:-2]
-              print(pilha)
+              #print(pilha)
 
             num_producao = acao[1]
             nao_terminal, producao = producoes[num_producao]
             tamanho_producao = len(producao) * 2
             pilha = pilha[:-tamanho_producao]
-            print(pilha)
+            #print(pilha)
             estado_topo = pilha[-1]
 
             if nao_terminal in tabela_SLR.columns and not pd.isna(tabela_SLR.loc[estado_topo, nao_terminal]):
                 desvio = interpretar_entrada_tabela(tabela_SLR.loc[estado_topo, nao_terminal])
             else:
                 print(f"Erro de desvio: não-terminal '{nao_terminal}' inesperado após redução.")
-                print(pilha)
+                #print(pilha)
                 return False
 
             if desvio and desvio[0] == 'desvio':
@@ -410,11 +411,195 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
             print("Erro: Ação desconhecida.")
             return False
 
-    if pilha[-1] == 15 and token_atual == 'FIM':
-       print("Aceitação: análise sintática concluída com sucesso.")
-    else:
-       print('ERRO ABSURDO')
+        if pilha[-1] == 15 and token_atual == 'FIM': #ULTIMA REDUÇÃO
+          estado_atual = pilha[-1]
+          acao = interpretar_entrada_tabela(tabela_SLR.loc[estado_atual, token_atual])
+          #print(acao)
+          num_producao = acao[1]
+          nao_terminal, producao = producoes[num_producao]
+          tamanho_producao = len(producao) * 2
+          pilha = pilha[:-tamanho_producao]
+          #print(pilha)
+          estado_topo = pilha[-1]
+
+          if nao_terminal in tabela_SLR.columns and not pd.isna(tabela_SLR.loc[estado_topo, nao_terminal]):
+              desvio = interpretar_entrada_tabela(tabela_SLR.loc[estado_topo, nao_terminal])
+          else:
+              print(f"Erro de desvio: não-terminal '{nao_terminal}' inesperado após redução.")
+              print(pilha)
+              return False
+
+          if desvio and desvio[0] == 'desvio':
+              pilha.append(nao_terminal)
+              pilha.append(desvio[1])
+          else:
+              print(f"Erro: Ação de desvio inválida para o não-terminal '{nao_terminal}'")
+              return False
+          #print()
+          print("Aceitação: análise sintática concluída com sucesso. EST 15")
+    
+# ------------------------------- Semantico  ---------------------------------------
+
+class AnalisadorSemantico:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.simbolos = {}  # Tabela de símbolos (nome -> tipo)
+        self.erros = []  # Lista de erros semânticos
+
+    def analisar(self):
+        i = 0
+        while i < len(self.tokens):
+            tipo, valor, linha = self.tokens[i]
+
+            # Evita erro de indexação antes de acessar tokens[i + 1]
+            if i + 1 < len(self.tokens):  
+
+                # Verifica declaração de variável
+                if tipo == "Variavel":
+                    proximo_tipo = self.tokens[i + 1][0]
+
+                    if proximo_tipo in {"INTEIRO", "REAL", "CARACTER", "ZEROUM"}:
+                        if valor in self.simbolos:
+                            self.erros.append(f"Erro na linha {linha}: Variável '{valor}' já declarada.")
+                        else:
+                            self.simbolos[valor] = proximo_tipo  # Adiciona à tabela de símbolos
+                        i += 1  # Pula o tipo da variável
+
+
+
+
+
+                    # Verifica atribuição de variável
+                    elif proximo_tipo == "RECEBA" and i + 2 < len(self.tokens):
+                          
+                        var_nome = valor
+                        #print(var_nome)
+
+                        valor_token = self.tokens[i + 2]
+                        #print(valor_token[1])
+
+                        valor_tipo = self.inferir_tipo(valor_token)
+                        
+
+                        tipo_da_var_a_ser_atrib = self.obter_tipo_variavel(valor_token[1], self.simbolos) #recebe o tipo da var a ser atribuida ex: j recebe b . (RETURN TIPO DO b)
+
+                        if var_nome not in self.simbolos:
+                            self.erros.append(f"Erro na linha {linha}: Variável '{var_nome}' não foi declarada antes do uso.")
+                        else:
+                            var_tipo = self.simbolos[var_nome]
+                            if valor_tipo and var_tipo != valor_tipo :
+                                  self.erros.append(f"Erro na linha {linha}: Tipo incompatível para '{var_nome}'. Esperado '{var_tipo}', encontrado '{valor_tipo}'.")  
+
+                        
+                        
+                        
+                        var_tipo = self.simbolos[var_nome] #recebe o tipo da var que recebe a atrib ex: j recebe b . (RETURN TIPO DO j)
+                        
+                        if tipo_da_var_a_ser_atrib and var_tipo != tipo_da_var_a_ser_atrib:
+                           self.erros.append(f"Erro na linha {linha}: Tipo incompatível para '{var_nome}'. Esperado '{var_tipo}', encontrado '{tipo_da_var_a_ser_atrib}'.")
+
+                        i += 2  #pula "RECEBA" e o valor atribuído
+                    
+                    
+              
+              
+
+                # Verifica operação entre variáveis    
+                elif tipo == "op_arit":
+                      op_esquerdo = self.tokens[i - 1]  # Token anterior
+                      variavel_esq = op_esquerdo[1]
+                      op_direito = self.tokens[i + 1]   # Token seguinte
+                      variavel_dir = op_direito[1]
+                      
+                      
+
+                      
+                      tipo_da_var_esq = self.obter_tipo_variavel(variavel_esq, self.simbolos)
+                      tipo_da_var_dir = self.obter_tipo_variavel(variavel_dir, self.simbolos)
+                      
+                     
+                      recebe = self.tokens[i - 3]
+                      var_recebe = recebe[1]
+                      tipo_da_recebe = self.obter_tipo_variavel(var_recebe, self.simbolos)
+
+                      if tipo_da_var_esq and tipo_da_var_dir and tipo_da_var_esq != tipo_da_var_dir:
+                        self.erros.append(f"Erro na linha {linha}: Operação inválida entre '{tipo_da_var_esq}' e '{tipo_da_var_dir}'.")
+
+                      if tipo_da_recebe and (tipo_da_recebe != tipo_da_var_esq or tipo_da_recebe != tipo_da_var_dir):
+                        self.erros.append(f"Erro na linha {linha}: O valor que recebe '{tipo_da_recebe}' é diferente de '{tipo_da_var_esq}' ou é diferente de '{tipo_da_var_dir}'.")
+            
+
+                # Verifica se condição do "SE", "DURANTE", "PARA" é um op_relacional   
+                elif tipo in {"SE", "DURANTE", "PARA"}:
+                  if not any(tok[0] == "op_relacional" for tok in self.tokens[i:i+5]):  #verifica 5 posições a frente (apos o "SE", "DURANTE", "PARA") se encontra um op_relacional.
+                    self.erros.append(f"Erro na linha {linha}: Expressão condicional inválida.") #como não encontrou um op_relacional, então erro.
+
+
+
+                # Verifica se a variavel que esta INC ou DEC é um INTEIRO  
+                elif tipo == "INC" or tipo == "DEC":
+                  var_nome = self.tokens[i - 1][1]  #Pegando variavel anterior ex: x INC . retorna 'x'
+    
+                  if self.simbolos.get(var_nome) != "INTEIRO":
+                    self.erros.append(f"Erro na linha {linha}: INC/DEC só pode ser usado com variáveis inteiras.")
+
+
+
+
+
+
+
+
+
+
+
+            i += 1  # Avança para o próximo token
+
+        return self.erros
+
+    def obter_tipo_variavel(self, nome_variavel, simbolos):
+      if nome_variavel in simbolos:
+        return simbolos[nome_variavel]
+      else:
+        return None
+
+
+    def inferir_tipo(self, token):
+        tipo, valor, _ = token
+        #print('tipo', tipo)
+        if tipo == "Num_inteiro":
+            return "INTEIRO"
+        elif tipo == "Num_real":
+            return "REAL"
+        elif tipo == "Caracter":
+            return "CARACTER"
+        elif tipo == "Zeroum":
+            return "ZEROUM"
+        return None
+
+
+
+
+
+
+
+
+
 
 
 tokens1 = tokens_atualizados #tokens do lexico
-analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes)
+analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes) #sintatico
+
+print()
+print(tokens_atualizados)
+print()
+
+# Exemplo de análise
+analisador = AnalisadorSemantico(tokens_atualizados)
+erros = analisador.analisar()
+
+if erros:
+    for erro in erros:
+        print(erro)
+else:
+    print("Análise semântica concluída sem erros!")
