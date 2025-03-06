@@ -5,8 +5,8 @@ INICIO
 !! Codigo aula de Compiladores
 
 x INTEIRO .
-!!a INTEIRO .
-!!b INTEIRO .
+a INTEIRO .
+b INTEIRO .
 !!k CARACTER .
 !!j INTEIRO .
 !!p ZEROUM .
@@ -16,7 +16,9 @@ x INTEIRO .
 !!o INTEIRO .
 !!i INTEIRO .
 
-!!j RECEBA 2 .
+a RECEBA b .
+!!a RECEBA 2 .
+b RECEBA a + x .
 !!x RECEBA 2 .
 !!b RECEBA 3 .
 !!k RECEBA x + b .
@@ -26,19 +28,19 @@ x INTEIRO .
 !!z RECEBA 0 .
 !!b RECEBA 1 .
 
-!!ESCREVA ( ^Digite seu nome: \q ^) .
+ESCREVA ( ^Digite seu nome: \q ^) .
 !!RECEBAT y .
 
-!!SE (a < b ) {
+SE (a < b ) {
 
 !!a RECEBA b .
-!!ESCREVA ( ^Digite seu nome: \q ^) .
-
-!!}
-
-!!SENAO_VAZIO
-!!SENAO {
 ESCREVA ( ^Digite seu nome: \q ^) .
+
+}
+
+SENAO_VAZIO
+!!SENAO {
+!!ESCREVA ( ^Digite seu nome: \q ^) .
 
 !!}
 
