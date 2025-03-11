@@ -326,10 +326,14 @@ producoes = {
 def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
     pilha = [0]
     cursor = 0
+    gerador_codigo = GeradorCodigoETAC()  # Inicializa o gerador de código
+    
 
     while cursor < len(tokens1):
         estado_atual = pilha[-1]  
-        token_atual = tokens1[cursor][0]  
+        token_atual = tokens1[cursor][0]
+        
+        #print(pilha)  
 
         if estado_atual == 71 and token_atual == '}': #look ahead
            #print('caso expecial')
@@ -375,7 +379,53 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
             tamanho_producao = len(producao) * 2
             pilha = pilha[:-tamanho_producao]
             #print(pilha)
+            #print(num_producao)
+            #print(pilha)
             estado_topo = pilha[-1]
+
+                    # Gerador de código ETAC
+            
+
+            #if num_producao == 23:  # <atrib> → RECEBA <expr> .
+            #    destino = pilha  # Variável de destino
+            #    #print('destino', tokens1[cursor][2])
+            #    origem = gerador_codigo.nova_temp()  # Gerar um temporário para a expressão
+            #    #print('origem', origem)
+            #    gerador_codigo.gerar_atribuicao(origem, destino)
+
+            #elif num_producao == 35:  # <expr> → <term> <op> <term>
+            #    op1 = pilha[-4]  # Primeiro termo
+            #    op2 = pilha[-2]  # Segundo termo
+            #    operador = pilha[-3]  # Operador
+            #    gerador_codigo.gerar_operacao_aritmetica(operador, op1,  op2)
+                #pilha.append(resultado)  # Empilha o resultado da operação
+
+            #elif num_producao == 26:  # <condicional_se> → SE (<expr>) { <instrucoes> } <senao_op>
+            #    condicao = pilha[-3]  # Condição da expressão
+            #    label_else = gerador_codigo.nova_label()  # Label para o bloco ELSE
+            #    label_fim = gerador_codigo.nova_label()  # Label para o fim do IF
+            #    gerador_codigo.gerar_condicional(condicao, label_else)
+            #    # Gera o bloco de instruções do IF
+            #    gerador_codigo.gerar_goto(label_fim)
+            #    gerador_codigo.gerar_label(label_else)
+            #    # Gera o bloco de instruções do ELSE (se houver)
+            #    gerador_codigo.gerar_label(label_fim)
+#
+            #elif num_producao == 29:  # <loop_durante> → DURANTE (<expr>) { <instrucoes> Variavel <inc_dec> }
+            #    condicao = pilha[-3]  # Condição do loop
+            #    label_inicio = gerador_codigo.nova_label()  # Label para o início do loop
+            #    label_fim = gerador_codigo.nova_label()  # Label para o fim do loop
+            #    gerador_codigo.gerar_label(label_inicio)
+            #    gerador_codigo.gerar_condicional(condicao, label_fim)
+            #    # Gera o bloco de instruções do loop
+            #    gerador_codigo.gerar_goto(label_inicio)
+            #    gerador_codigo.gerar_label(label_fim)
+
+
+
+
+
+
 
             if nao_terminal in tabela_SLR.columns and not pd.isna(tabela_SLR.loc[estado_topo, nao_terminal]):
                 desvio = interpretar_entrada_tabela(tabela_SLR.loc[estado_topo, nao_terminal])
@@ -390,6 +440,7 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
             else:
                 print(f"Erro: Ação de desvio inválida para o não-terminal '{nao_terminal}'")
                 return False
+
         else:
             print("Erro: Ação desconhecida.")
             return False
@@ -409,7 +460,7 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
               desvio = interpretar_entrada_tabela(tabela_SLR.loc[estado_topo, nao_terminal])
           else:
               print(f"Erro de desvio: não-terminal '{nao_terminal}' inesperado após redução.")
-              print(pilha)
+              #print(pilha)
               return False
 
           if desvio and desvio[0] == 'desvio':
@@ -418,8 +469,12 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
           else:
               print(f"Erro: Ação de desvio inválida para o não-terminal '{nao_terminal}'")
               return False
+
           #print()
-          print("Aceitação: análise sintática concluída com sucesso.")
+          print("Aceitação: análise sintática concluída com sucesso. 15")
+          return True
+    
+        #print(pilha)
     
 # ------------------------------- Semantico  ---------------------------------------
 
@@ -429,15 +484,18 @@ class AnalisadorSemantico:
         self.simbolos = {}  # Tabela de símbolos (nome -> tipo)
         self.erros = []  # Lista de erros semânticos
         self.gerador = GeradorCodigoETAC()  #
+        
 
     def analisar(self):
+        abrePara = False
         i = 0
         while i < len(self.tokens):
             tipo, valor, linha = self.tokens[i]
-
+            #token_atual = tokens1[cursor][0]
             #evita erro de indexação antes de acessar tokens[i + 1]
             if i + 1 < len(self.tokens):  
                 
+                   
                 #verifica se inicia com INICIO
                 if i == 0 and tipo != "INICIO" :
                   self.erros.append(f"Erro na linha {i}: Esperava 'INICIO'")
@@ -450,7 +508,7 @@ class AnalisadorSemantico:
                         if valor in self.simbolos:
                             self.erros.append(f"Erro na linha {linha}: Variável '{valor}' já declarada.")
                         else:
-                            self.simbolos[valor] = proximo_tipo  #adiciona à tabela de símbolos
+                            self.simbolos[valor] = proximo_tipo  #adiciona à tabela de símbolos   
                         i += 1  #pula o tipo da variável
 
                     #verifica atribuição de variável
@@ -490,7 +548,7 @@ class AnalisadorSemantico:
                        
                             
 
-                            if self.tokens[i + 3][0] == '.':
+                            if self.tokens[i + 3][0] == '.': #se for atrib direta
                               self.gerador.gerar_atribuicao(var_nome, valor_token[1]) #geradorC
 
                 
@@ -517,27 +575,29 @@ class AnalisadorSemantico:
                       if tipo_da_recebe and (tipo_da_recebe != tipo_da_var_esq or tipo_da_recebe != tipo_da_var_dir):
                         self.erros.append(f"Erro na linha {linha}: O valor que recebe '{tipo_da_recebe}' é diferente de '{tipo_da_var_esq}' ou é diferente de '{tipo_da_var_dir}'.")
             
-                      print('valor', valor) 
+                      #print('valor', valor) 
                       temp = self.gerador.gerar_operacao_aritmetica(valor, variavel_esq, variavel_dir) #geradorC
                       self.gerador.gerar_atribuicao(recebedor, temp) #geradorC
 
                 #Verifica se condição do "SE", "DURANTE", "PARA" é um op_relacional   
-                elif tipo in {"SE", "DURANTE", "PARA"}:
+                elif tipo == "SE":
 
-                  if not any(tok[0] == "op_relacional" for tok in self.tokens[i:i+5]):  #verifica 5 posições a frente (apos o "SE", "DURANTE", "PARA") se encontra um op_relacional.
+                  if not any(tok[0] == "op_relacional" for tok in self.tokens[i:i+5]):  #verifica 5 posições a frente (apos o "SE") se encontra um op_relacional.
                     self.erros.append(f"Erro na linha {linha}: Expressão condicional inválida.") #como não encontrou um op_relacional, então erro.
 
-                  variaveis = []
+                
                   tipos = []
 
                   for tok in self.tokens[i:i+5]:
                     if tok[0] == "Variavel":
-                        variaveis.append(tok[1])
-                        tipos.append(self.simbolos[tok[1]])
+                        if tok[1] in self.simbolos:
+                           tipos.append(self.simbolos[tok[1]])
+                        else:
+                           self.erros.append(f"Erro na linha {linha}: Variável '{tok[1]}' não declarada.")
 
-                  for var in variaveis:
-                    if var not in self.simbolos:
-                        self.erros.append(f"Erro na linha {linha}: Variável '{var}' não declarada.")
+                  #for var in variaveis:
+                    #if var not in self.simbolos:
+                        #self.erros.append(f"Erro na linha {linha}: Variável '{var}' não declarada.")
 
                   if len(tipos) == 2 and tipos[0] != tipos[1]:
                     self.erros.append(f"Erro na linha {linha}: Na condição '{tipo}' os tipos de variáveis são incompatíveis na expressão condicional.")
@@ -556,14 +616,113 @@ class AnalisadorSemantico:
                   label_false = self.gerador.novo_label()
 
                   self.gerador.gerar_condicional(temp, label_true, label_false)
-
                   self.gerador.gerar_label(label_true)
-                  # Código para o bloco verdadeiro
+                
+                elif tipo == "}" and (self.tokens[i + 1][0] == 'SENAO' or self.tokens[i + 1][0] == 'SENAO_VAZIO') :
                   self.gerador.gerar_label(label_false)
-                  # Código para o bloco falso
+                   
+                elif tipo == "ESCREVA":
+                   mensagem = self.tokens[i + 2][1]
+                   self.gerador.gerar_escreva(mensagem)
 
 
 
+                elif tipo == "PARA":
+
+                  if not any(tok[0] == "op_relacional" for tok in self.tokens[i:i+10]):  #verifica 10 posições a frente (apos o "PARA") se encontra um op_relacional.
+                    self.erros.append(f"Erro na linha {linha}: Expressão condicional inválida.") #como não encontrou um op_relacional, então erro.
+
+                  
+                  tipos = []
+                  
+
+                  for tok in self.tokens[i:i+13]:
+                    if tok[0] == "Variavel":
+                        if tok[1] in self.simbolos:
+                           tipos.append(self.simbolos[tok[1]])
+                        else:
+                           self.erros.append(f"Erro na linha {linha}: Variável '{tok[1]}' não declarada.")
+
+                  if len(tipos) == 2 and tipos[0] != tipos[1]:
+                    self.erros.append(f"Erro na linha {linha}: Na condição '{tipo}' os tipos de variáveis são incompatíveis na expressão condicional.")
+
+
+                
+
+                  #cria Geração de código para operação relacional             
+                  for j, tok in enumerate(self.tokens[i:i + 13]):
+                    if tok[0] == "op_relacional":
+                      op_esquerdo = self.tokens[i + j - 1]
+                      op_direito = self.tokens[i + j + 1]
+                      tempPARA = self.gerador.gerar_operacao_relacional(tok[1], op_esquerdo[1], op_direito[1]) #geradorC 
+                      
+                    if tok[0] == "INC":
+                       var_inc = self.tokens[i + j - 1][1]
+                       
+
+                # Geração de código ETAC para condicionais
+                  label_volta_para = self.gerador.novo_label()
+                  label_true = self.gerador.novo_label()
+                  label_false = self.gerador.novo_label()
+
+                  
+                  #self.gerador.gerar_label(label_true)
+
+
+
+                elif tipo == "{" and self.tokens[i - 2][0] == 'INC':
+                      abrePara = True
+                      self.gerador.gerar_label(label_volta_para)
+                      self.gerador.gerar_condicional(tempPARA, label_true, label_false)
+                      self.gerador.gerar_label(label_true)
+                      abrePara = False
+
+                elif tipo == "}" and abrePara:
+                  self.gerador.emitir(f"{var_inc} += 1")
+                  self.gerador.emitir(f"goto {label_volta_para}")
+                  self.gerador.gerar_label(label_false)
+
+
+
+                elif tipo == "DURANTE":
+                  label_volta_dura = self.gerador.novo_label()
+                  label_true = self.gerador.novo_label()
+                  label_false = self.gerador.novo_label()  
+
+                  if not any(tok[0] == "op_relacional" for tok in self.tokens[i:i+5]):  #verifica 5 posições a frente (apos o "DURANTE") se encontra um op_relacional.
+                    self.erros.append(f"Erro na linha {linha}: Expressão condicional inválida.") #como não encontrou um op_relacional, então erro.
+
+                  tipos = []
+                  
+                  for tok in self.tokens[i:i+5]:
+                    if tok[0] == "Variavel":
+                        if tok[1] in self.simbolos:
+                           tipos.append(self.simbolos[tok[1]])
+                        else:
+                           self.erros.append(f"Erro na linha {linha}: Variável '{tok[1]}' não declarada.")
+
+                  if len(tipos) == 2 and tipos[0] != tipos[1]:
+                    self.erros.append(f"Erro na linha {linha}: Na condição '{tipo}' os tipos de variáveis são incompatíveis na expressão condicional.")
+
+                  
+
+                  for j, tok in enumerate(self.tokens[i:i + 13]):
+                    if tok[0] == "op_relacional":
+                      op_esquerdo = self.tokens[i + j - 1]
+                      op_direito = self.tokens[i + j + 1]
+                      
+                      tempDURA = self.gerador.gerar_operacao_relacional(tok[1], op_esquerdo[1], op_direito[1]) #geradorC
+                      self.gerador.gerar_label(label_volta_dura)
+                      self.gerador.gerar_condicional(tempDURA, label_true, label_false)
+                      self.gerador.gerar_label(label_true)
+                
+                elif tipo == "}" and self.tokens[i - 1][0] == 'INC' :
+                  var_inc = self.tokens[i - 2][1]
+                  self.gerador.emitir(f"{var_inc} += 1")
+                  self.gerador.emitir(f"goto {label_volta_dura}")
+                  self.gerador.gerar_label(label_false)
+                    
+                    
                 #Verifica se a variavel que esta INC ou DEC é um INTEIRO  
                 elif tipo == "INC" or tipo == "DEC":
                   var_nome = self.tokens[i - 1][1]  #Pegando variavel anterior ex: x INC . retorna 'x'
@@ -585,6 +744,8 @@ class AnalisadorSemantico:
             elif i < len(self.tokens):
               if tipo != 'FIM':
                 self.erros.append(f"Erro: Esperava 'FIM' ao final do codigo")
+              elif tipo == 'FIM':
+                self.gerador.emitir(f"END")
 
             i += 1  # Avança para o próximo token
         
@@ -664,6 +825,13 @@ class GeradorCodigoETAC:
     def gerar_goto(self, label):
         """Gera uma instrução de salto."""
         self.emitir(f"goto {label}")
+
+    def gerar_escreva(self, mensagem):
+      # Remove os caracteres especiais (^ e \q) e trata a mensagem
+      mensagem_formatada = mensagem.replace("^", "").replace("\\q", "\\n")  # Substitui \q por \n para nova linha
+    
+      # Gera uma instrução ETAC para imprimir a mensagem
+      self.emitir(f'print("{mensagem_formatada}")')
 
     
 tokens1 = tokens_atualizados #tokens do lexico

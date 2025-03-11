@@ -8,13 +8,13 @@ x INTEIRO .
 a INTEIRO .
 b INTEIRO .
 !!k CARACTER .
-!!j INTEIRO .
+j INTEIRO .
 !!p ZEROUM .
 !!a REAL .
 !!y CARACTER .
 !!z ZEROUM .
 !!o INTEIRO .
-!!i INTEIRO .
+i INTEIRO .
 
 a RECEBA b .
 !!a RECEBA 2 .
@@ -33,27 +33,30 @@ ESCREVA ( ^Digite seu nome: \q ^) .
 
 SE (a < b ) {
 
-!!a RECEBA b .
-ESCREVA ( ^Digite seu nome: \q ^) .
+a RECEBA b .
+!!ESCREVA ( ^Digite seu nome: \q ^) .
 
 }
 
-SENAO_VAZIO
-!!SENAO {
-!!ESCREVA ( ^Digite seu nome: \q ^) .
+!!SENAO_VAZIO
+SENAO {
+ESCREVA ( ^aqui e o senao \q ^) .
 
-!!}
+}
 
-!!DURANTE (x DIF b ) {
-!!j RECEBA b .
-!!x INC
-!!}
 
-!!PARA (i RECEBA 0 . . i < b . i INC ){
+
+PARA (i RECEBA 0 . . i < b . i INC ){
 
 !!b RECEBA a .
+ESCREVA ( ^aqui e o PARA \q ^) .
 
-!!}
+}
+
+DURANTE (j DIF x ) {
+j RECEBA b .
+x INC
+}
 
 !!a RECEBA 2,4 .
 
