@@ -421,6 +421,7 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
               desvio = interpretar_entrada_tabela(tabela_SLR.loc[estado_topo, nao_terminal])
           else:
               print(f"Erro de desvio: não-terminal '{nao_terminal}' inesperado após redução.")
+              #errosintatico = True
               #print(pilha)
               return False
 
@@ -429,6 +430,7 @@ def analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes):
               pilha.append(desvio[1])
           else:
               print(f"Erro: Ação de desvio inválida para o não-terminal '{nao_terminal}'")
+              #errosintatico = True
               return False
 
           #print()
@@ -798,17 +800,16 @@ class GeradorCodigoETAC:
 
     
 tokens1 = tokens_atualizados #tokens do lexico
-analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes) #sintatico
-
+errosintatico = analisador_sintatico_bottom_up(tokens1, tabela_SLR, producoes) #sintatico
 analisador = AnalisadorSemantico(tokens_atualizados) #semantico
-erros = analisador.analisar() #erros do semantico
+errossemanticos = analisador.analisar() #erros do semantico
 
 print()
 #print(tokens_atualizados)
 print()
 
-if erros:
-    for erro in erros:
+if errossemanticos or errosintatico==False : #se possuir erros sematicos ou possuir erros sintaticos: printa os erros semanticos (erros sintaticos são printados dentro do sintatico.)
+    for erro in errossemanticos:
         print(erro)
 else:
     print("Análise semântica concluída sem erros!")
