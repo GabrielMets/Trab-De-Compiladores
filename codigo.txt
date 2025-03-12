@@ -1,40 +1,64 @@
 INICIO
+!!VAZIO_DECLS
+!!VAZIO_INSTRUCOES
 
 !! Codigo aula de Compiladores
 
 x INTEIRO .
-a REAL .
-b INTEIRO .
-y CARACTER .
-z ZEROUM .
-i INTEIRO .
+!!a INTEIRO .
+!!b INTEIRO .
+!!k CARACTER .
+!!j INTEIRO .
+!!p ZEROUM .
+!!a REAL .
+!!y CARACTER .
+!!z ZEROUM .
+!!o INTEIRO .
+!!i INTEIRO .
 
-a RECEBA 1,5 .
-x RECEBA 2 .
-y RECEBA ^Luva dnjsndndwsndwndwndw^ .
-z RECEBA 0 .
-b RECEBA 1 .
+!!a RECEBA b .
+!!a RECEBA 2 .
+!!b RECEBA a + x .
+!!x RECEBA 2 .
+!!b RECEBA 3 .
+!!k RECEBA x + b .
 
+!!l RECEBA ^Luva dnjsndndwsndwndwndw^ .
+!!y RECEBA ^Luva dnjsndndwsndwndwndw^ .
+!!z RECEBA 0 .
+!!b RECEBA 1 .
+
+!!ESCREVA ( y ) .
+!!RECEBAT y .
+
+SE (x DIF x ) {
+
+!!a RECEBA b + 1 .
 ESCREVA ( ^Digite seu nome: \q ^) .
-RECEBAT y .
-
-SE (x > b ) {
-
-a RECEBA y + z .
-} SENAO {
-a RECEBA b .
 
 }
 
-DURANTE (x DIF b ) {
-x INC .
-}
+SENAO_VAZIO
+!!SENAO {
+!!ESCREVA ( ^aqui e o senao \q ^) .
 
-PARA (i RECEBA 0 . i < b . i INC ){
+!!}
 
-b RECEBA a .
 
-}
+
+!!PARA (i RECEBA 0 . . i DIF b . i INC ){
+
+!!b RECEBA a .
+!!ESCREVA ( ^aqui e o PARA \q ^) .
+
+!!}
+
+!!DURANTE (x DIF x ) {
+!!j RECEBA b .
+!!x INC
+!!}
+
+!!a RECEBA 2,4 .
 
 FIM
 
