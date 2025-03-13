@@ -1,64 +1,56 @@
-INICIO
+INICIO              !!deve começar com INICIO      
 !!VAZIO_DECLS
 !!VAZIO_INSTRUCOES
 
 !! Codigo aula de Compiladores
 
 x INTEIRO .
-!!a INTEIRO .
-!!b INTEIRO .
-!!k CARACTER .
-!!j INTEIRO .
-!!p ZEROUM .
-!!a REAL .
-!!y CARACTER .
-!!z ZEROUM .
-!!o INTEIRO .
-!!i INTEIRO .
+a INTEIRO .
+b INTEIRO .
+i INTEIRO .
+y INTEIRO .
+j INTEIRO .
+!!a INTEIRO .       !!a declarado anteriormente
+!!u REAL .
 
-!!a RECEBA b .
-!!a RECEBA 2 .
-!!b RECEBA a + x .
-!!x RECEBA 2 .
-!!b RECEBA 3 .
-!!k RECEBA x + b .
+a RECEBA b .
+b RECEBA a + x .
+!!p RECEBA 2 .      !!p não declarado
+!!a RECEBA 2,5.     !!a é INTEIRO recebendo REAL
+!!y RECEBA u .      !!y é INTEIRO e u é REAL
+!!j RECEBA a + u .  !!a e u de tipos diferentes
+!!u RECEBA a + b .  !!u é de tipo diferente de a e b
 
-!!l RECEBA ^Luva dnjsndndwsndwndwndw^ .
-!!y RECEBA ^Luva dnjsndndwsndwndwndw^ .
-!!z RECEBA 0 .
-!!b RECEBA 1 .
+RECEBAT y .
+!!RECEBAT 2 .       !!RECEBAT deve ser com variavel && variavel deve ser declarada antes
 
-!!ESCREVA ( y ) .
-!!RECEBAT y .
+!!SE (a + b ) {     !!deve ser um op_relacional e nao aritmetico, a e b devem ser declaradas, a e b devem ser do mesmo tipo.
+SE (a > b ) {       
 
-SE (x DIF x ) {
-
-!!a RECEBA b + 1 .
 ESCREVA ( ^Digite seu nome: \q ^) .
 
-}
+}                   !!cuidar com o numero de chaves abertas e fechadas
+
 
 SENAO_VAZIO
 !!SENAO {
 !!ESCREVA ( ^aqui e o senao \q ^) .
-
 !!}
 
 
 
-!!PARA (i RECEBA 0 . . i DIF b . i INC ){
+PARA (i RECEBA 0 . . i DIF b . i INC ){     !!i deve ser INTEIRO. (var INC, var deve ser INTEIRO)
 
-!!b RECEBA a .
-!!ESCREVA ( ^aqui e o PARA \q ^) .
 
-!!}
+ESCREVA ( ^aqui e o PARA \q ^) .
 
-!!DURANTE (x DIF x ) {
-!!j RECEBA b .
-!!x INC
-!!}
+}
 
-!!a RECEBA 2,4 .
+DURANTE (x < a ) {
+j RECEBA b .
+x INC                                       !!x deve ser INTEIRO.
+}
 
-FIM
+
+FIM                                         !!deve terminar com FIM
 
